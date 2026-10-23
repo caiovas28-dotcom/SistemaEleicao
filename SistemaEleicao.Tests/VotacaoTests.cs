@@ -9,15 +9,11 @@ public class VotacaoTests
     [Fact]
     public void EleitorNaoPodeVotarDuasVezes()
     {
-        // Arrange: prepara a eleição
         var eleicao = new EleicaoManager();
 
         eleicao.CadastrarCandidato("Ana", 10);
-
-        // Act: eleitor realiza o primeiro voto
         eleicao.RegistrarVoto("123456789", 10);
 
-        // Assert: segundo voto deve ser bloqueado
         Assert.Throws<InvalidOperationException>(() =>
             eleicao.RegistrarVoto("123456789", 10));
     }
@@ -25,15 +21,44 @@ public class VotacaoTests
     [Fact]
     public void VotoEmCandidatoInexistenteDeveSerNulo()
     {
-        // Arrange
         var eleicao = new EleicaoManager();
 
         eleicao.CadastrarCandidato("Ana", 10);
-
-        // Act: eleitor vota em número inexistente
         eleicao.RegistrarVoto("987654321", 99);
 
-        // Assert: verifica se o voto foi contabilizado como nulo
         Assert.Equal(1, eleicao.VotosNulos);
+    }
+
+    [Fact]
+    public void VotoBrancoDeveSerContabilizado()
+    {
+        var eleicao = new EleicaoManager();
+
+        eleicao.RegistrarVoto("111111111", 0);
+
+        Assert.Equal(1, eleicao.VotosBrancos);
+    }
+
+    [Fact]
+    public void VotoValidoDeveSerContabilizado()
+    {
+        var eleicao = new EleicaoManager();
+
+        eleicao.CadastrarCandidato("Ana", 10);
+        eleicao.RegistrarVoto("222222222", 10);
+
+        Assert.Equal(0, eleicao.VotosNulos);
+        Assert.Equal(0, eleicao.VotosBrancos);
+    }
+
+    [Fact]
+    public void NaoDevePermitirEleitorDuplicado()
+    {
+        var eleicao = new EleicaoManager();
+
+        eleicao.RegistrarEleitor("333333333");
+
+        Assert.Throws<InvalidOperationException>(() =>
+            eleicao.RegistrarEleitor("333333333"));
     }
 }
